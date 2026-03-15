@@ -71,17 +71,73 @@
  *   isLassiStand(stand);                    // => true
  *   isLassiStand({});                       // => false
  */
-export function LassiStand(name, city) {
-  // Your code here
-}
+
 
 // Add prototype methods here:
-// LassiStand.prototype.addFlavor = function(flavor, price) { ... }
-// LassiStand.prototype.takeOrder = function(customerName, flavor, quantity) { ... }
-// LassiStand.prototype.completeOrder = function(orderId) { ... }
-// LassiStand.prototype.getRevenue = function() { ... }
-// LassiStand.prototype.getMenu = function() { ... }
+export function LassiStand(name, city) {
+  this.name = name;
+  this.city = city;
+  this.menu = [];
+  this.orders = [];
+  this._nextOrderId = 1;
+}
 
+// Add flavor
+LassiStand.prototype.addFlavor = function (flavor, price) {
+  if (price <= 0) return -1;
+
+  const exists = this.menu.find(item => item.flavor === flavor);
+  if (exists) return -1;
+
+  this.menu.push({ flavor, price });
+  return this.menu.length;
+};
+
+// Take order
+LassiStand.prototype.takeOrder = function (customerName, flavor, quantity) {
+  if (quantity <= 0) return -1;
+
+  const item = this.menu.find(m => m.flavor === flavor);
+  if (!item) return -1;
+
+  const order = {
+    id: this._nextOrderId++,
+    customer: customerName,
+    flavor: flavor,
+    quantity: quantity,
+    total: item.price * quantity,
+    status: "pending"
+  };
+
+  this.orders.push(order);
+  return order.id;
+};
+
+// Complete order
+LassiStand.prototype.completeOrder = function (orderId) {
+  const order = this.orders.find(o => o.id === orderId);
+
+  if (!order || order.status === "completed") {
+    return false;
+  }
+
+  order.status = "completed";
+  return true;
+};
+
+// Get revenue
+LassiStand.prototype.getRevenue = function () {
+  return this.orders
+    .filter(o => o.status === "completed")
+    .reduce((sum, o) => sum + o.total, 0);
+};
+
+// Get menu copy
+LassiStand.prototype.getMenu = function () {
+  return this.menu.map(item => ({ ...item }));
+};
+
+// Instance check
 export function isLassiStand(obj) {
-  // Your code here
+  return obj instanceof LassiStand;
 }
